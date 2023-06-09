@@ -62,7 +62,7 @@ jobs:
           name: verify kubectl connected
           command: |
             kubectl get nodes
-            if [[ $(kubectl get nodes | grep -q "ready") ]]; then
+            if [[ $(kubectl get nodes | grep -q "active") ]]; then
               echo "kubectl connected"
             else
               echo "kubectl error"
@@ -79,9 +79,10 @@ jobs:
       steps:
         - checkout
         - run:
-            name: install dependencies 
-            command: |
-              yum install -y tar gzip
+          name: install dependencies 
+          command: |
+            sudo apt-get update && \
+            sudo apt-get install -y tar gzip
         
         - run:
             name: Install kubectl
@@ -102,8 +103,8 @@ jobs:
 workflows:
   default:
     jobs:
-      - deploy-infrastructure
-      - configure-infrastructure:
-          requires: [deploy-infrastructure]
+#      - deploy-infrastructure
+      - configure-infrastructure
+#          requires: [deploy-infrastructure]
 
       
