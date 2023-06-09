@@ -112,15 +112,15 @@ jobs:
             command: |
               eksctl get cluster --name=cap-1cada17 --region=us-west-2
         
-        - run: 
-            name: install docker image into cluster
-            command: |
-              kubectl apply -f ~/project/deployment.yml
+#        - run: 
+#            name: install docker image into cluster
+#            command: |
+#              kubectl apply -f ~/project/deployment.yml
         
         - run: 
             name: create ELB with external ip for cluster
             command: |
-              kubectl apply -f ~/cap/ELBCreate.yml
+              kubectl apply -f ~/project/ELBCreate.yml
 
 workflows:
   default:
