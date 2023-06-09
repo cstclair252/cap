@@ -79,10 +79,10 @@ jobs:
       steps:
         - checkout
         - run:
-            name: install dependencies 
-            command: |
-              sudo apt-get update && \
-              sudo apt-get install -y tar gzip
+          name: install dependencies 
+          command: |
+            sudo apt-get update && \
+            sudo apt-get install -y tar gzip
         
         - run:
             name: Install kubectl
@@ -90,6 +90,16 @@ jobs:
               curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
               sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 
+        - run: 
+            name: kubeconfig saved
+            command: |
+              eksctl utils write-kubeconfig --cluster=cap-1cada17
+      
+        - run: 
+            name: verify cluster
+            command: |
+              eksctl get cluster --name=cap-1cada17 --region=us-west-2
+        
         - run: 
             name: install docker image into cluster
             command: |
