@@ -115,7 +115,7 @@ jobs:
         - run: 
             name: install docker image into cluster
             command: |
-              kubectl apply -f /home/deployment.yml
+              kubectl apply -f ~/project/deployment.yml
         
         - run: 
             name: create ELB with external ip for cluster
