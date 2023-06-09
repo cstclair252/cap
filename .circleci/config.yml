@@ -22,7 +22,8 @@ jobs:
       - run:
           name: install dependencies 
           command: |
-            yum install -y tar gzip
+            sudo apt-get update && \
+            sudo apt-get install -y tar gzip
       
       - run:
           name: Install eksctl
