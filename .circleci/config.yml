@@ -13,12 +13,12 @@ commands:
           command: |
             eksctl delete cluster --name cap-${CIRCLE_WORKFLOW_ID:0:7}
 
-deploy-infrastructure:
+jobs:
+  deploy-infrastructure:
     docker:
       - image: cimg/aws:2023.06
     steps:
       - checkout
-  
       - run:
           name: install dependencies 
           command: |
@@ -36,11 +36,11 @@ deploy-infrastructure:
 
             sudo mv /tmp/eksctl /usr/local/bin
       
-      -run: 
+      - run: 
           name: install kubectl 
           command: |
-            		curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-		            sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+                curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+                sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
       
       - run:
           name: setup kubernetes cluster 
@@ -66,38 +66,37 @@ deploy-infrastructure:
             else
               echo "kubectl error"
             fi
-      
-      #- destroy-cluster
-#might need to store this somewhere in here the name of the cluster since i will have to delete it later. or delete the old one. in the verify cluster run command above. 
+        
+        #- destroy-cluster
+  #might need to store this somewhere in here the name of the cluster since i will have to delete it later. or delete the old one. in the verify cluster run command above. 
 
 
 
-configure-infrastructure:
-    docker:
-      - image: cimg/aws:2023.06
-    steps:
-      - checkout
-  
-      - run:
-          name: install dependencies 
-          command: |
-            yum install -y tar gzip
-      
-      - run:
-          name: Install kubectl
-          command: |
-            curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-            sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+  configure-infrastructure:
+      docker:
+        - image: cimg/aws:2023.06
+      steps:
+        - checkout
+        - run:
+            name: install dependencies 
+            command: |
+              yum install -y tar gzip
+        
+        - run:
+            name: Install kubectl
+            command: |
+              curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+              sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 
-      -run: 
-          name: install docker image into cluster
-          command: |
-            kubectl apply -f ~/deployment.yml
-      
-      -run: 
-          name: create ELB with external ip for cluster
-          command: |
-            kubectl apply -f ~/cap/ELBCreate.yml
+        - run: 
+            name: install docker image into cluster
+            command: |
+              kubectl apply -f ~/deployment.yml
+        
+        - run: 
+            name: create ELB with external ip for cluster
+            command: |
+              kubectl apply -f ~/cap/ELBCreate.yml
 
 workflows:
   default:
