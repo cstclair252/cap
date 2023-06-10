@@ -185,15 +185,35 @@ jobs:
 #                --enabled \
 #                --comment "CloudFront distribution for ELB"
 
-
-
+  smoke-test:
+      docker:
+        - image: cimg/aws:2023.06
+      steps:
+        - checkout
+        - run:
+            name: install dependencies 
+            command: |
+              sudo apt-get update && \
+              sudo apt-get install -y tar gzip && \
+              sudo apt install -y tar gzip curl unzip
+        
+        - run:
+            name: website smoke test.
+            command: |
+              if curl $(aws cloudfront list-distributions --query 'DistributionList.Items[].DomainName' --output text) | grep "title"
+              then
+                exit 0
+              else
+                exit 1
+              fi
 
 workflows:
   default:
     jobs:
 #      - deploy-infrastructure
 #      - configure-infrastructure
-      - configure-cloudfront
+#      - configure-cloudfront
+      - smoke-test
 #          requires: [deploy-infrastructure]
 
       
