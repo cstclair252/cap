@@ -14,6 +14,19 @@ commands:
             eksctl delete cluster --name cap-${CIRCLE_WORKFLOW_ID:0:7}
 
 jobs:
+  docker-lint:
+    docker:
+      - image: cimg/aws:2023.06
+    steps:
+      - checkout
+      - run:
+          name: Lint Dockerfile
+          command: |
+            sudo wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64
+            sudo chmod +x /bin/hadolint
+            cd ~/project/
+            sudo hadolint Dockerfile
+  
   deploy-infrastructure:
     docker:
       - image: cimg/aws:2023.06
@@ -105,12 +118,12 @@ jobs:
         - run: 
             name: kubeconfig saved
             command: |
-              eksctl utils write-kubeconfig --cluster=cap-1cada17
+              eksctl utils write-kubeconfig --cluster=cap-${CIRCLE_WORKFLOW_ID:0:7}
       
         - run: 
             name: verify cluster
             command: |
-              eksctl get cluster --name=cap-1cada17 --region=us-west-2
+              eksctl get cluster --name=cap-${CIRCLE_WORKFLOW_ID:0:7} --region=us-west-2
         
         - run: 
             name: install docker image into cluster
@@ -154,12 +167,12 @@ jobs:
         - run: 
             name: kubeconfig saved
             command: |
-              eksctl utils write-kubeconfig --cluster=cap-1cada17
+              eksctl utils write-kubeconfig --cluster=cap-${CIRCLE_WORKFLOW_ID:0:7}
       
         - run: 
             name: verify cluster
             command: |
-              eksctl get cluster --name=cap-1cada17 --region=us-west-2
+              eksctl get cluster --name=cap-${CIRCLE_WORKFLOW_ID:0:7} --region=us-west-2
         
 
 #              dns_name=$(kubectl get service cap-1cada17 -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
@@ -210,10 +223,11 @@ jobs:
 workflows:
   default:
     jobs:
+      - docker-lint
 #      - deploy-infrastructure
 #      - configure-infrastructure
 #      - configure-cloudfront
-      - smoke-test
+#      - smoke-test
 #          requires: [deploy-infrastructure]
 
       
