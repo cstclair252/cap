@@ -164,8 +164,9 @@ jobs:
         - run: 
             name: get services
             command: |
-              IP=$kubectl get service cap-1cada17 -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
-              cat $IP
+              kubectl get service cap-1cada17 -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+              export IP=$(kubectl get service cap-1cada17 -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+              echo $IP
         - run: 
             name: setup cloudfront distribution
             command: |
