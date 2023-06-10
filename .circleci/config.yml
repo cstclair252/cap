@@ -20,12 +20,34 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Lint Dockerfile
+          name: lint dockerfile
           command: |
             sudo wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64
             sudo chmod +x /bin/hadolint
             cd ~/project/
             sudo hadolint Dockerfile
+  
+
+  docker-build-and-push-image:
+    docker:
+      - image: cimg/aws:2023.06
+    steps:
+      - checkout
+      - run:
+          name: Build and push Docker image
+          command: |
+            docker build -t ${DOCKERHUB_USERNAME}/cap .
+            docker login -u ${DOCKERHUB_USERNAME} -p ${DOCKERHUB_PASSWORD}
+            docker push ${DOCKERHUB_USERNAME}/cap
+
+  docker-build:
+    docker:
+      - image:cimg/aws:2023.06
+      steps:
+        - checkout
+        - run:
+            name: build docker image
+
   
   deploy-infrastructure:
     docker:
@@ -223,7 +245,8 @@ jobs:
 workflows:
   default:
     jobs:
-      - docker-lint
+#      - docker-lint
+      - docker-build-and-push-image
 #      - deploy-infrastructure
 #      - configure-infrastructure
 #      - configure-cloudfront
