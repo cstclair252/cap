@@ -166,7 +166,14 @@ jobs:
             command: |
               kubectl get service cap-1cada17 -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
               export IP=$(kubectl get service cap-1cada17 -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+              aws cloudfront create-distribution \
+                --origin-domain-name $IP \
+                --default-root-object index.html \
+                --enabled \
+                --comment "CloudFront distribution for ELB"
+
               echo $IP
+
         - run: 
             name: setup cloudfront distribution
             command: |
