@@ -40,15 +40,6 @@ jobs:
             docker login -u ${DOCKERHUB_USERNAME} -p ${DOCKERHUB_PASSWORD}
             docker push ${DOCKERHUB_USERNAME}/cap
 
-  docker-build:
-    docker:
-      - image:cimg/aws:2023.06
-      steps:
-        - checkout
-        - run:
-            name: build docker image
-
-  
   deploy-infrastructure:
     docker:
       - image: cimg/aws:2023.06
