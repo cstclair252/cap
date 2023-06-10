@@ -161,31 +161,29 @@ jobs:
             command: |
               eksctl get cluster --name=cap-1cada17 --region=us-west-2
         
-#        - run: 
-#            name: get services
-#            command: |
+
 #              dns_name=$(kubectl get service cap-1cada17 -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
 #              updated_dns_name=$(echo "$dns_name" | sed 's/.\+\.\(.\+\.\)elb\.amazonaws\.com/us-west-2.elb.amazonaws.com/')
 #              export IP="$updated_dns_name"
+        - run: 
+            name: get EIB External IP and Setup Cloudfront
+            command: |
+              kubectl get service cap-1cada17 -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+              export IP=$(kubectl get service cap-1cada17 -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+              aws cloudfront create-distribution \
+                --origin-domain-name $IP \
+                --default-root-object index.html
 
-#              kubectl get service cap-1cada17 -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
-#              export IP=$(kubectl get service cap-1cada17 -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+              echo $IP
+
+#        - run: 
+#            name: setup cloudfront distribution
+#            command: |
 #              aws cloudfront create-distribution \
-#                --origin-domain-name $IP \
+#                --origin-domain-name aee05b329fc03418388daf4e88f62c61-351425741.us-west-2.elb.amazonaws.com/ \
 #                --default-root-object index.html \
 #                --enabled \
 #                --comment "CloudFront distribution for ELB"
-#
-#              echo $IP
-
-        - run: 
-            name: setup cloudfront distribution
-            command: |
-              aws cloudfront create-distribution \
-                --origin-domain-name aee05b329fc03418388daf4e88f62c61-351425741.us-west-2.elb.amazonaws.com/ \
-                --default-root-object index.html \
-                --enabled \
-                --comment "CloudFront distribution for ELB"
 
 
 

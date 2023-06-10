@@ -1,0 +1,47 @@
+Comment: "ELB to CloudFront Distribution"
+Enabled: true
+Origins:
+  Quantity: 1
+  Items:
+    - Id: ELB
+      DomainName: aee05b329fc03418388daf4e88f62c61-351425741.us-west-2.elb.amazonaws.com
+      CustomHeaders:
+        Quantity: 0
+      OriginPath: ""
+      CustomOriginConfig:
+        HTTPPort: 80
+        HTTPSPort: 443
+        OriginProtocolPolicy: http-only
+        OriginSslProtocols:
+          Quantity: 3
+          Items:
+            - TLSv1
+            - TLSv1.1
+            - TLSv1.2
+        OriginReadTimeout: 30
+        OriginKeepaliveTimeout: 5
+DefaultCacheBehavior:
+  TargetOriginId: ELB
+  ForwardedValues:
+    QueryString: "false"
+    Cookies:
+      Forward: none
+  ViewerProtocolPolicy: redirect-to-https
+  TrustedSigners:
+    Enabled: false
+    Quantity: 0
+  AllowedMethods:
+    Quantity: 2
+    Items:
+      - GET
+      - HEAD
+    CachedMethods:
+      Quantity: 2
+      Items:
+        - GET
+        - HEAD
+SmoothStreaming: false
+PriceClass: PriceClass_All
+ViewerCertificate:
+  CloudFrontDefaultCertificate: true
+HttpVersion: http2
