@@ -164,16 +164,12 @@ jobs:
         - run: 
             name: get services
             command: |
-              kubectl get service cap-1cada17 -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
-        
+              IP=$kubectl get service cap-1cada17 -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+              cat $IP
         - run: 
             name: setup cloudfront distribution
             command: |
-              aws cloudfront create-distribution \
-                --origin-domain-name "$(kubectl get service <service_name> -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')" \
-                --default-root-object index.html \
-                --enabled \
-                --comment "CloudFront distribution for ELB"
+              aws cloudfront create-distribution --origin-domain-name "$(kubectl get service <service_name> -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')" --default-root-object index.html --enabled --comment "CloudFront distribution for ELB"
 
 
 
