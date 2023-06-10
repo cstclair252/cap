@@ -164,6 +164,10 @@ jobs:
         - run: 
             name: get services
             command: |
+              dns_name=$(kubectl get service cap-1cada17 -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+              updated_dns_name=$(echo "$dns_name" | sed 's/.\+\.\(.\+\.\)elb\.amazonaws\.com/us-west-2.elb.amazonaws.com/')
+              export IP="$updated_dns_name"
+
               kubectl get service cap-1cada17 -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
               export IP=$(kubectl get service cap-1cada17 -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
               aws cloudfront create-distribution \
