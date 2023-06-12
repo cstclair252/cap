@@ -250,6 +250,8 @@ jobs:
         - run:
             name: Update CloudFront Distribution
             command: |
+              pwd
+              ls
               cd ~/project
               jq '.Origins.Items[0].DomainName = env.DomainName' distribution-config.json > updated-config.json
               mv updated-config.json distribution-config.json
