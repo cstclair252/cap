@@ -247,7 +247,7 @@ jobs:
               sudo apt install jq
               jq '.Origins.Items[0].DomainName = env.DomainName' distribution-config.json > updated-config.json
               mv updated-config.json distribution-config.json
-              aws cloudfront update-distribution --id E2BYV5ZTTW57XP --if-match E18P11T61QYMI8 --distribution-config file://distribution-config.json
+              aws cloudfront update-distribution --id E2BYV5ZTTW57XP --if-match E2RT9SOD0SP881 --distribution-config file://distribution-config.json
 
   smoke-test:
       docker:
