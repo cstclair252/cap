@@ -34,7 +34,7 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker:
-          version: 20.10.7
+          version: 20.10.14
       - run:
           name: Build and push Docker image
           command: |
@@ -47,14 +47,14 @@ jobs:
       - image: cimg/aws:2023.06
     steps:
       - checkout
-      - run:
+      - run: &install-dependencies
           name: install dependencies 
           command: |
             sudo apt-get update && \
             sudo apt-get install -y tar gzip
       
-      - run:
-          name: Install eksctl
+      - run: &install-eksctl
+          name: Install-eksctl
           command: |
             ARCH=amd64
             PLATFORM=$(uname -s)_$ARCH
@@ -65,7 +65,7 @@ jobs:
 
             sudo mv /tmp/eksctl /usr/local/bin
       
-      - run: 
+      - run: &install-kubectl
           name: install kubectl 
           command: |
                 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
@@ -106,29 +106,9 @@ jobs:
         - image: cimg/aws:2023.06
       steps:
         - checkout
-        - run:
-            name: install dependencies 
-            command: |
-              sudo apt-get update && \
-              sudo apt-get install -y tar gzip
-        
-        - run:
-            name: Install kubectl
-            command: |
-              curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-              sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-
-        - run:
-            name: Install eksctl
-            command: |
-              ARCH=amd64
-              PLATFORM=$(uname -s)_$ARCH
-
-              curl -sLO "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$PLATFORM.tar.gz"
-
-              tar -xzf eksctl_$PLATFORM.tar.gz -C /tmp && rm eksctl_$PLATFORM.tar.gz
-
-              sudo mv /tmp/eksctl /usr/local/bin
+        - *install-dependencies
+        - *install-eksctl
+        - *install-kubectl
         
         - run: 
             name: kubeconfig saved
@@ -238,12 +218,12 @@ jobs:
 workflows:
   default:
     jobs:
-#      - docker-lint
+      - docker-lint
       - docker-build-and-push-image
-#      - deploy-infrastructure
-#      - configure-infrastructure
-#      - configure-cloudfront
-#      - smoke-test
-#          requires: [deploy-infrastructure]
+      - deploy-infrastructure
+      - configure-infrastructure
+      - configure-cloudfront
+      - smoke-test
+          requires: [deploy-infrastructure]
 
       
