@@ -47,13 +47,13 @@ jobs:
       - image: cimg/aws:2023.06
     steps:
       - checkout
-      - run: &install-dependencies
+      - run: 
           name: install dependencies 
           command: |
             sudo apt-get update && \
             sudo apt-get install -y tar gzip
       
-      - run: &install-eksctl
+      - run: 
           name: Install-eksctl
           command: |
             ARCH=amd64
@@ -65,7 +65,7 @@ jobs:
 
             sudo mv /tmp/eksctl /usr/local/bin
       
-      - run: &install-kubectl
+      - run: 
           name: install kubectl 
           command: |
                 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
@@ -106,9 +106,29 @@ jobs:
         - image: cimg/aws:2023.06
       steps:
         - checkout
-        - *install-dependencies
-        - *install-eksctl
-        - *install-kubectl
+        - run: 
+            name: install dependencies 
+            command: |
+              sudo apt-get update && \
+              sudo apt-get install -y tar gzip
+      
+        - run: 
+            name: Install-eksctl
+            command: |
+              ARCH=amd64
+              PLATFORM=$(uname -s)_$ARCH
+
+              curl -sLO "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$PLATFORM.tar.gz"
+
+              tar -xzf eksctl_$PLATFORM.tar.gz -C /tmp && rm eksctl_$PLATFORM.tar.gz
+
+              sudo mv /tmp/eksctl /usr/local/bin
+        
+        - run: 
+            name: install kubectl 
+            command: |
+                  curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+                  sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
         
         - run: 
             name: kubeconfig saved
