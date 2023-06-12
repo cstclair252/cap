@@ -246,6 +246,7 @@ jobs:
               sudo apt install jq
               cd ~/project/
               pwd
+              cat deployment.yml
               jq '.Origins.Items[0].DomainName = env.DomainName' ~/project/distribution-config.json > ~/project/updated-config.json
               mv updated-config.json distribution-config.json
               aws cloudfront update-distribution --id E2BYV5ZTTW57XP --if-match E18P11T61QYMI8 --distribution-config file://distribution-config.json
