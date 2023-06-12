@@ -223,7 +223,7 @@ workflows:
       - deploy-infrastructure
       - configure-infrastructure
       - configure-cloudfront
-      - smoke-test
+      - smoke-test:
           requires: [configure-cloudfront]
 
       
