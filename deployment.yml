@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cap-1cada17
+  name: cap-
 spec:
   replicas: 3
   selector:

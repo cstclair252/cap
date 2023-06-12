@@ -3,8 +3,8 @@ Enabled: true
 Origins:
   Quantity: 1
   Items:
-    - Id: ELB
-      DomainName: aee05b329fc03418388daf4e88f62c61-351425741.us-west-2.elb.amazonaws.com
+    - Id: E2BYV5ZTTW57XP
+      DomainName: a631c6b2265414a2489bf6d5abef7002-1676976706.us-west-2.elb.amazonaws.com
       CustomHeaders:
         Quantity: 0
       OriginPath: ""

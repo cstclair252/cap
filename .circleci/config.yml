@@ -70,6 +70,19 @@ jobs:
           command: |
                 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
                 sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+
+#this is going to gather the current site for deletion later if green site passes smoke-test
+
+      - run: 
+          name: gather bluesite variable
+          command: |
+            eksctl get cluster | awk 'NR==2 {print $1}' --output text > ~/project/.circleci/bluesite-cluster.txt
+            cat ~/project/.circleci/bluesite-cluster.txt
+      
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            -  project/.circleci/bluesite-cluster.txt 
       
       - run:
           name: setup kubernetes cluster 
@@ -99,8 +112,7 @@ jobs:
         #- destroy-cluster
   #might need to store this somewhere in here the name of the cluster since i will have to delete it later. or delete the old one. in the verify cluster run command above. 
 
-
-
+  
   configure-infrastructure:
       docker:
         - image: cimg/aws:2023.06
@@ -196,8 +208,8 @@ jobs:
         - run: 
             name: get EIB External IP and Setup Cloudfront
             command: |
-              kubectl get service cap-1cada17 -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
-              export IP=$(kubectl get service cap-1cada17 -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+              kubectl get service cap-${CIRCLE_WORKFLOW_ID:0:7} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+              export IP=$(kubectl get service cap-${CIRCLE_WORKFLOW_ID:0:7} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
               aws cloudfront create-distribution \
                 --origin-domain-name $IP \
                 --default-root-object index.html
@@ -212,7 +224,36 @@ jobs:
 #                --default-root-object index.html \
 #                --enabled \
 #                --comment "CloudFront distribution for ELB"
+  switchbluetogreen:
+      docker:
+        - image: cimg/aws:2023.06
+      steps:
+        - checkout
+        - run:
+            name: get EIB External IP and Setup Cloudfront
+            command: |
+              kubectl get service cap-${CIRCLE_WORKFLOW_ID:0:7} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+              export IP=$(kubectl get service cap-${CIRCLE_WORKFLOW_ID:0:7} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+              aws cloudfront update-distribution \
+                --id DISTRIBUTION_ID E2BYV5ZTTW57XP \
+                --origin-domain-name elbtest-1347572264.us-west-2.elb.amazonaws.com \
+                --default-root-object index.html
 
+
+
+  update-cloudfront:
+      environment:
+        DomainName: elbtest-1347572264.us-west-2.elb.amazonaws.com
+      steps:
+        - run:
+            name: Update CloudFront Distribution
+            command: |
+              jq '.Origins.Items[0].DomainName = env.DomainName' distribution-config.json > updated-config.json
+              mv updated-config.json distribution-config.json
+              aws cloudfront update-distribution --id E2BYV5ZTTW57XP --if-match E18P11T61QYMI8 --distribution-config file://distribution-config.json
+
+
+    
   smoke-test:
       docker:
         - image: cimg/aws:2023.06
@@ -224,6 +265,10 @@ jobs:
               sudo apt-get update && \
               sudo apt-get install -y tar gzip && \
               sudo apt install -y tar gzip curl unzip
+        
+        - run:
+              name: Wait for cloudformation to deploy before smoke test
+              command: sleep 180
         
         - run:
             name: website smoke test.
@@ -238,16 +283,17 @@ jobs:
 workflows:
   default:
     jobs:
-      - docker-lint
-      - docker-build-and-push-image:
-          requires: [docker-lint]
-      - deploy-infrastructure:
-          requires: [docker-build-and-push-image]
-      - configure-infrastructure:
-          requires: [deploy-infrastructure]
-      - configure-cloudfront:
-          requires: [configure-infrastructure]
-      - smoke-test:
-          requires: [configure-cloudfront]
+      - update-cloudfront
+#      - docker-lint
+#      - docker-build-and-push-image:
+#          requires: [docker-lint]
+#      - deploy-infrastructure:
+#          requires: [docker-build-and-push-image]
+#      - configure-infrastructure:
+#          requires: [deploy-infrastructure]
+#      - configure-cloudfront:
+#          requires: [configure-infrastructure]
+#      - smoke-test:
+#          requires: [configure-cloudfront]
 
       

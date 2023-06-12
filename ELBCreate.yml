@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: cap-1cada17
+  name: cap-
 spec:
   type: LoadBalancer
   selector:
