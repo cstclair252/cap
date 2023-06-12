@@ -239,10 +239,14 @@ workflows:
   default:
     jobs:
       - docker-lint
-      - docker-build-and-push-image
-      - deploy-infrastructure
-      - configure-infrastructure
-      - configure-cloudfront
+      - docker-build-and-push-image:
+          requires: [docker-lint]
+      - deploy-infrastructure:
+          requires: [docker-build-and-push-image]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
+      - configure-cloudfront:
+          requires: [configure-infrastructure]
       - smoke-test:
           requires: [configure-cloudfront]
 
