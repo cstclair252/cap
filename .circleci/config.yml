@@ -196,16 +196,16 @@ jobs:
         - run: 
             name: kubeconfig saved
             command: |
-              eksctl utils write-kubeconfig --cluster=cap-${CIRCLE_WORKFLOW_ID:0:7}
+              eksctl utils write-kubeconfig --cluster=cap-5d7674a
       
         - run: 
             name: verify cluster
             command: |
-              eksctl get cluster --name=cap-${CIRCLE_WORKFLOW_ID:0:7} --region=us-west-2
+              eksctl get cluster --name=cap-5d7674a --region=us-west-2
         - run:
             name: get domain name
             command: |
-              export DomainName=$(kubectl get service cap-${CIRCLE_WORKFLOW_ID:0:7} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+              export DomainName=$(kubectl get service cap-5d7674a -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
               echo "Domain name:" $DomainName
         - run:
             name: Update CloudFront Distribution
@@ -251,7 +251,7 @@ jobs:
         - run:
             name: get domain name
             command: |
-              export DomainName=$(kubectl get service cap-5d7674a -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+              export DomainName=$(kubectl get service cap-${CIRCLE_WORKFLOW_ID:0:7} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
               echo "Domain name:" $DomainName
         - run:
             name: Update CloudFront Distribution
