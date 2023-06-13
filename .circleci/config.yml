@@ -161,10 +161,6 @@ jobs:
             name: create ELB with external ip for cluster
             command: |
               kubectl apply -f ~/project/ELBCreate.yml
-        - run:
-            name: save new ELB hostname
-            command: |
-              a4b51c8927b40403aa2399463226b57f-1084825143.us-west-2.elb.amazonaws.com
 
   configure-cloudfront:
       docker:
@@ -239,7 +235,7 @@ jobs:
         - run:
             name: get domain name
             command: |
-              export DomainName=$(kubectl get service cap-f85715f -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+              export DomainName=$(kubectl get service cap-${CIRCLE_WORKFLOW_ID:0:7} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
               echo "Domain name: $DomainName"
         - run:
             name: Update CloudFront Distribution
@@ -282,18 +278,18 @@ workflows:
   default:
     jobs:
       
-      - update-cloudfront
-#      - docker-lint
-#      - docker-build-and-push-image:
-#          requires: [docker-lint]
-#      - deploy-infrastructure:
-#          requires: [docker-build-and-push-image]
-#      - configure-infrastructure:
-#          requires: [deploy-infrastructure]
-#      - configure-cloudfront:
-#          requires: [configure-infrastructure]
-#      - smoke-test:
-#          requires: [configure-cloudfront]
+
+      - docker-lint
+      - docker-build-and-push-image:
+          requires: [docker-lint]
+      - deploy-infrastructure:
+          requires: [docker-build-and-push-image]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
+      - update-cloudfront:
+          requires: [configure-infrastructure]
+      - smoke-test:
+          requires: [update-cloudfront]
 #      - update-cloudfront:
 #          requires: [smoke-test]
 
