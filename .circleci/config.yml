@@ -304,7 +304,7 @@ workflows:
       - configure-cloudfront:
           requires: [configure-infrastructure]
       - smoke-test:
-          requires: [update-cloudfront]
+          requires: [configure-cloudfront]
 #      - update-cloudfront:
 #          requires: [smoke-test]
 
