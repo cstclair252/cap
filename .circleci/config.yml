@@ -206,7 +206,7 @@ jobs:
         - run:
             name: Update CloudFront Distribution
             command: |
-              export DomainName="$(kubectl get service cap-5d7674a -o jsonpath='{.status.loadBalancer.ingress[0].hostname}"')
+              export DomainName=$(kubectl get service cap-5d7674a -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
               echo "Domain name:" $DomainName
               echo "${DomainName}"
               echo 
