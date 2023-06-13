@@ -163,6 +163,8 @@ jobs:
               kubectl apply -f ~/project/ELBCreate.yml
 
   configure-cloudfront:
+      environment:
+        DomainName: ""
       docker:
         - image: cimg/aws:2023.06
       steps:
@@ -200,21 +202,35 @@ jobs:
             name: verify cluster
             command: |
               eksctl get cluster --name=cap-${CIRCLE_WORKFLOW_ID:0:7} --region=us-west-2
-        
+        - run:
+            name: get domain name
+            command: |
+              export DomainName=$(kubectl get service cap-${CIRCLE_WORKFLOW_ID:0:7} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+              echo "Domain name:" $DomainName
+        - run:
+            name: Update CloudFront Distribution
+            command: |
+              echo "${DomainName}"
+              sudo apt install jq
+              jq '.Origins.Items[0].DomainName = env.DomainName' distribution-config.json > updated-config.json
+              mv updated-config.json distribution-config.json
+              ifmatch=$(aws cloudfront get-distribution-config --id E2BYV5ZTTW57XP | jq -r '.ETag')
+              echo $ifmatch
+              aws cloudfront update-distribution --id E2BYV5ZTTW57XP --if-match $ifmatch --distribution-config file://distribution-config.json
 
 #              dns_name=$(kubectl get service cap-1cada17 -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-#              updated_dns_name=$(echo "$dns_name" | sed 's/.\+\.\(.\+\.\)elb\.amazonaws\.com/us-west-2.elb.amazonaws.com/')
-#              export IP="$updated_dns_name"
-        - run: 
-            name: get EIB External IP and Setup Cloudfront
-            command: |
-              kubectl get service cap-${CIRCLE_WORKFLOW_ID:0:7} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
-              export IP=$(kubectl get service cap-${CIRCLE_WORKFLOW_ID:0:7} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-              aws cloudfront create-distribution \
-                --origin-domain-name $IP \
-                --default-root-object index.html
 
-              echo $IP
+
+#        - run: 
+#            name: get EIB External IP and Setup Cloudfront
+#            command: |
+#              kubectl get service cap-${CIRCLE_WORKFLOW_ID:0:7} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+#              export IP=$(kubectl get service cap-${CIRCLE_WORKFLOW_ID:0:7} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+#              aws cloudfront create-distribution \
+#                --origin-domain-name $IP \
+#                --default-root-object index.html
+#
+#              echo $IP
 
 #        - run: 
 #            name: setup cloudfront distribution
@@ -236,7 +252,7 @@ jobs:
             name: get domain name
             command: |
               export DomainName=$(kubectl get service cap-${CIRCLE_WORKFLOW_ID:0:7} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-              echo "Domain name: $DomainName"
+              echo "Domain name:" $DomainName
         - run:
             name: Update CloudFront Distribution
             command: |
@@ -279,17 +295,18 @@ workflows:
     jobs:
       
 
-      - docker-lint
-      - docker-build-and-push-image:
-          requires: [docker-lint]
-      - deploy-infrastructure:
-          requires: [docker-build-and-push-image]
-      - configure-infrastructure:
-          requires: [deploy-infrastructure]
-      - update-cloudfront:
-          requires: [configure-infrastructure]
-      - smoke-test:
-          requires: [update-cloudfront]
+      - configure-cloudfront
+#      - docker-lint
+#      - docker-build-and-push-image:
+#          requires: [docker-lint]
+#      - deploy-infrastructure:
+#          requires: [docker-build-and-push-image]
+#      - configure-infrastructure:
+#          requires: [deploy-infrastructure]
+#      - update-cloudfront:
+#          requires: [configure-infrastructure]
+#      - smoke-test:
+#          requires: [update-cloudfront]
 #      - update-cloudfront:
 #          requires: [smoke-test]
 
