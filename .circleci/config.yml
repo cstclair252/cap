@@ -210,6 +210,7 @@ jobs:
             command: |
               export DomainName=$(kubectl get service deployment-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
               echo "Domain name:" $DomainName
+              kubectl get service
               echo "${DomainName}"
               echo 
               sudo apt install jq
