@@ -227,7 +227,7 @@ jobs:
 
   update-cloudfront:
       environment:
-        DomainName: "$(kubectl get service cap-f85715f -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
+        DomainName: a4b51c8927b40403aa2399463226b57f-1084825143.us-west-2.elb.amazonaws.com
       docker:
         - image: cimg/aws:2023.06
       steps:
