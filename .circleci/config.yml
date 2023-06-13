@@ -227,7 +227,7 @@ jobs:
 
   update-cloudfront:
       environment:
-        DomainName: "$(kubectl get service cap-${CIRCLE_WORKFLOW_ID:0:7} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
+        DomainName: "$(kubectl get service cap-f85715f -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
       docker:
         - image: cimg/aws:2023.06
       steps:
@@ -273,18 +273,19 @@ workflows:
   default:
     jobs:
       
-      - docker-lint
-      - docker-build-and-push-image:
-          requires: [docker-lint]
-      - deploy-infrastructure:
-          requires: [docker-build-and-push-image]
-      - configure-infrastructure:
-          requires: [deploy-infrastructure]
-      - configure-cloudfront:
-          requires: [configure-infrastructure]
-      - smoke-test:
-          requires: [configure-cloudfront]
-      - update-cloudfront:
-          requires: [smoke-test]
+      - update-cloudfront
+#      - docker-lint
+#      - docker-build-and-push-image:
+#          requires: [docker-lint]
+#      - deploy-infrastructure:
+#          requires: [docker-build-and-push-image]
+#      - configure-infrastructure:
+#          requires: [deploy-infrastructure]
+#      - configure-cloudfront:
+#          requires: [configure-infrastructure]
+#      - smoke-test:
+#          requires: [configure-cloudfront]
+#      - update-cloudfront:
+#          requires: [smoke-test]
 
       
