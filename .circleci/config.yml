@@ -76,7 +76,7 @@ jobs:
       - run: 
           name: gather bluesite variable
           command: |
-            eksctl get cluster | awk 'NR==2 {print $1}' --output text > ~/project/.circleci/bluesite-cluster.txt
+            eksctl get cluster | awk 'NR==2 {print $1}' > ~/project/.circleci/bluesite-cluster.txt
             cat ~/project/.circleci/bluesite-cluster.txt
       
       - persist_to_workspace:
