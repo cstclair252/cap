@@ -253,6 +253,7 @@ jobs:
             command: |
               export DomainName=$(kubectl get service cap-${CIRCLE_WORKFLOW_ID:0:7} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
               echo "Domain name:" $DomainName
+              kubectl get services
         - run:
             name: Update CloudFront Distribution
             command: |
@@ -294,17 +295,18 @@ workflows:
   default:
     jobs:
       
-      - docker-lint
-      - docker-build-and-push-image:
-          requires: [docker-lint]
-      - deploy-infrastructure:
-          requires: [docker-build-and-push-image]
-      - configure-infrastructure:
-          requires: [deploy-infrastructure]
-      - configure-cloudfront:
-          requires: [configure-infrastructure]
-      - smoke-test:
-          requires: [configure-cloudfront]
+      - update-cloudfront
+#      - docker-lint
+#      - docker-build-and-push-image:
+#          requires: [docker-lint]
+#      - deploy-infrastructure:
+#          requires: [docker-build-and-push-image]
+#      - configure-infrastructure:
+#          requires: [deploy-infrastructure]
+#      - configure-cloudfront:
+#          requires: [configure-infrastructure]
+#      - smoke-test:
+#          requires: [configure-cloudfront]
 #      - update-cloudfront:
 #          requires: [smoke-test]
 
