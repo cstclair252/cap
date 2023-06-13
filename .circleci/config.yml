@@ -213,6 +213,7 @@ jobs:
               sudo apt install jq
               jq '.Origins.Items[0].DomainName = env.DomainName' distribution-config.json > updated-config.json
               mv updated-config.json distribution-config.json
+              cat distribution-config.json
               ifmatch=$(aws cloudfront get-distribution-config --id E2BYV5ZTTW57XP | jq -r '.ETag')
               echo $ifmatch
               aws cloudfront update-distribution --id E2BYV5ZTTW57XP --if-match $ifmatch --distribution-config file://distribution-config.json
