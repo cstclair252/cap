@@ -109,7 +109,7 @@ jobs:
               echo "kubectl error"
             fi
         
-        #- destroy-cluster
+        #- destroy-cluster i
   #might need to store this somewhere in here the name of the cluster since i will have to delete it later. or delete the old one. in the verify cluster run command above. 
 
   
@@ -294,19 +294,17 @@ workflows:
   default:
     jobs:
       
-
-      - configure-cloudfront
-#      - docker-lint
-#      - docker-build-and-push-image:
-#          requires: [docker-lint]
-#      - deploy-infrastructure:
-#          requires: [docker-build-and-push-image]
-#      - configure-infrastructure:
-#          requires: [deploy-infrastructure]
-#      - update-cloudfront:
-#          requires: [configure-infrastructure]
-#      - smoke-test:
-#          requires: [update-cloudfront]
+      - docker-lint
+      - docker-build-and-push-image:
+          requires: [docker-lint]
+      - deploy-infrastructure:
+          requires: [docker-build-and-push-image]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
+      - configure-cloudfront:
+          requires: [configure-infrastructure]
+      - smoke-test:
+          requires: [update-cloudfront]
 #      - update-cloudfront:
 #          requires: [smoke-test]
 
