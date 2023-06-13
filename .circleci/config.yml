@@ -235,6 +235,7 @@ jobs:
         - run:
             name: Update CloudFront Distribution
             command: |
+              cat env.DomainName
               sudo apt install jq
               jq '.Origins.Items[0].DomainName = env.DomainName' distribution-config.json > updated-config.json
               mv updated-config.json distribution-config.json
@@ -279,9 +280,11 @@ workflows:
           requires: [docker-build-and-push-image]
       - configure-infrastructure:
           requires: [deploy-infrastructure]
-      - update-cloudfront:
+      - configure-cloudfront:
           requires: [configure-infrastructure]
       - smoke-test:
-          requires: [update-cloudfront]
+          requires: [configure-cloudfront]
+      - update-cloudfront:
+          requires: [smoke-test]
 
       
