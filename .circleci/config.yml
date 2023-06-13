@@ -224,19 +224,10 @@ jobs:
 #                --default-root-object index.html \
 #                --enabled \
 #                --comment "CloudFront distribution for ELB"
-  switchbluetogreen:
-      docker:
-        - image: cimg/aws:2023.06
-      steps:
-        - checkout
-        - run:
-            name: get EIB External IP and Setup Cloudfront
-            command: |
-              aws cloudfront update-distribution --id E2BYV5ZTTW57XP --if-match E18P11T61QYMI8 --distribution-config file://distribution-config.json
 
   update-cloudfront:
       environment:
-        DomainName: elbtest-1347572264.us-west-2.elb.amazonaws.com
+        DomainName: "$(kubectl get service cap-${CIRCLE_WORKFLOW_ID:0:7} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')"
       docker:
         - image: cimg/aws:2023.06
       steps:
@@ -280,17 +271,17 @@ jobs:
 workflows:
   default:
     jobs:
-      - update-cloudfront
-#      - docker-lint
-#      - docker-build-and-push-image:
-#          requires: [docker-lint]
-#      - deploy-infrastructure:
-#          requires: [docker-build-and-push-image]
-#      - configure-infrastructure:
-#          requires: [deploy-infrastructure]
-#      - configure-cloudfront:
-#          requires: [configure-infrastructure]
-#      - smoke-test:
-#          requires: [configure-cloudfront]
+      
+      - docker-lint
+      - docker-build-and-push-image:
+          requires: [docker-lint]
+      - deploy-infrastructure:
+          requires: [docker-build-and-push-image]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
+      - update-cloudfront:
+          requires: [configure-infrastructure]
+      - smoke-test:
+          requires: [configure-cloudfront]
 
       
