@@ -164,7 +164,7 @@ jobs:
 
   configure-cloudfront:
       environment:
-        DomainName: $(kubectl get service eib-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+        DomainName: ""
       docker:
         - image: cimg/aws:2023.06
       steps:
@@ -208,8 +208,8 @@ jobs:
         - run:
             name: Update CloudFront Distribution
             command: |
-              echo "${DomainName}"
-              echo 
+              export DomainName=$(kubectl get service eib-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+              echo "Domain name:" $DomainName
               sudo apt install jq
               jq '.Origins.Items[0].DomainName = env.DomainName' distribution-config.json > updated-config.json
               mv updated-config.json distribution-config.json
