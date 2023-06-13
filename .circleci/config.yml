@@ -161,6 +161,10 @@ jobs:
             name: create ELB with external ip for cluster
             command: |
               kubectl apply -f ~/project/ELBCreate.yml
+        - run:
+            name: save new ELB hostname
+            command: |
+              a4b51c8927b40403aa2399463226b57f-1084825143.us-west-2.elb.amazonaws.com
 
   configure-cloudfront:
       docker:
@@ -227,11 +231,16 @@ jobs:
 
   update-cloudfront:
       environment:
-        DomainName: a4b51c8927b40403aa2399463226b57f-1084825143.us-west-2.elb.amazonaws.com
+        DomainName: ""
       docker:
         - image: cimg/aws:2023.06
       steps:
         - checkout
+        - run:
+            name: get domain name
+            command: |
+              export DomainName=$(kubectl get service cap-f85715f -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+              echo "Domain name: $DomainName"
         - run:
             name: Update CloudFront Distribution
             command: |
