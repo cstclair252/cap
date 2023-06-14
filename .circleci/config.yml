@@ -284,8 +284,10 @@ jobs:
             name: get configs
             command: |
               kubectl get services
-  
-  update-cloudfront:
+
+#setup-cloudfront is to setup the cloudfront for the very first time
+
+  setup-cloudfront:
       environment:
         DomainName: ""
       docker:
@@ -328,6 +330,17 @@ jobs:
             command: |
               eksctl utils write-kubeconfig --cluster=cap-${CIRCLE_WORKFLOW_ID:0:7}
         
+        - run: 
+            name: get EIB External IP and Setup Cloudfront
+            command: |
+              kubectl get service cap-${CIRCLE_WORKFLOW_ID:0:7} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+              export IP=$(kubectl get service cap-${CIRCLE_WORKFLOW_ID:0:7} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+              aws cloudfront create-distribution \
+                --origin-domain-name $IP \
+                --default-root-object index.html
+
+              echo $IP
+        
         - run:
             name: Update CloudFront Distribution
             command: |
@@ -368,10 +381,10 @@ jobs:
 workflows:
   default:
     jobs:
-      - update-test
-#      - docker-lint
-#      - docker-build-and-push-image:
-#          requires: [docker-lint]
+#      - update-test
+      - docker-lint
+      - docker-build-and-push-image:
+          requires: [docker-lint]
 #      - deploy-infrastructure:
 #          requires: [docker-build-and-push-image]
 #      - configure-infrastructure:
