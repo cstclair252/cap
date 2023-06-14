@@ -371,12 +371,25 @@ jobs:
         - run:
             name: website smoke test.
             command: |
+              export DomainName=$(kubectl get service eib-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+              echo "Domain name:" $DomainName
+              
               if curl $(aws cloudfront list-distributions --query 'DistributionList.Items[].DomainName' --output text) | grep "title"
               then
+              echo "smoke test successful"
                 exit 0
               else
+                echo "smoke test failed"
                 exit 1
               fi
+
+              if curl $(kubectl get service eib-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}') | grep "title"
+              then
+                echo "ELB-IP Test passed"
+              else
+                echo "EIB-IP test failed"
+
+#        - destroy-environment
 
 workflows:
   default:
@@ -385,15 +398,14 @@ workflows:
       - docker-lint
       - docker-build-and-push-image:
           requires: [docker-lint]
-#      - deploy-infrastructure:
-#          requires: [docker-build-and-push-image]
-#      - configure-infrastructure:
-#          requires: [deploy-infrastructure]
-#      - configure-cloudfront:
-#          requires: [configure-infrastructure]
-#      - smoke-test:
-#          requires: [configure-cloudfront]
-#      - update-cloudfront:
-#          requires: [smoke-test]
+      - deploy-infrastructure:
+          requires: [docker-build-and-push-image]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
+      - configure-cloudfront:
+          requires: [configure-infrastructure]
+      - smoke-test:
+          requires: [configure-cloudfront]
+
 
       
