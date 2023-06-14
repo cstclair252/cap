@@ -240,7 +240,16 @@ jobs:
 #                --default-root-object index.html \
 #                --enabled \
 #                --comment "CloudFront distribution for ELB"
-
+  update-test:
+      docker: 
+        - image: cimg/aws:2323.06
+      steps:
+        - checkout
+        - run:
+            name: get configs
+            command: |
+              kubectl get services
+  
   update-cloudfront:
       environment:
         DomainName: ""
@@ -253,7 +262,37 @@ jobs:
             command: |
               export DomainName=$(kubectl get service cap-${CIRCLE_WORKFLOW_ID:0:7} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
               echo "Domain name:" $DomainName
-              kubectl get services
+              
+        
+        - run:
+            name: install dependencies 
+            command: |
+              sudo apt-get update && \
+              sudo apt-get install -y tar gzip
+        
+        - run:
+            name: Install kubectl
+            command: |
+              curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+              sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+        
+        - run:
+            name: Install eksctl
+            command: |
+              ARCH=amd64
+              PLATFORM=$(uname -s)_$ARCH
+
+              curl -sLO "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$PLATFORM.tar.gz"
+
+              tar -xzf eksctl_$PLATFORM.tar.gz -C /tmp && rm eksctl_$PLATFORM.tar.gz
+
+              sudo mv /tmp/eksctl /usr/local/bin
+        
+        - run: 
+            name: kubeconfig saved
+            command: |
+              eksctl utils write-kubeconfig --cluster=cap-${CIRCLE_WORKFLOW_ID:0:7}
+        
         - run:
             name: Update CloudFront Distribution
             command: |
@@ -295,7 +334,7 @@ workflows:
   default:
     jobs:
       
-      - update-cloudfront
+      - update-test
 #      - docker-lint
 #      - docker-build-and-push-image:
 #          requires: [docker-lint]
