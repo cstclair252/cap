@@ -242,7 +242,7 @@ jobs:
 #                --comment "CloudFront distribution for ELB"
   update-test:
       docker: 
-        - image: cimg/aws:2323.06
+        - image: cimg/aws:2023.06
       steps:
         - checkout
         - run:
