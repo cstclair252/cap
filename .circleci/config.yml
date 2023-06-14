@@ -196,14 +196,21 @@ jobs:
         - run: 
             name: kubeconfig saved
             command: |
-              eksctl utils write-kubeconfig --cluster=cap-${CIRCLE_WORKFLOW_ID:0:7}
+              eksctl utils write-kubeconfig --cluster=cap-5775807
       
         - run: 
             name: verify cluster
             command: |
-              eksctl get cluster --name=cap-${CIRCLE_WORKFLOW_ID:0:7} --region=us-west-2
+              eksctl get cluster --name=cap-5775807 --region=us-west-2
 
 #              export DomainName=$(kubectl get service deployment-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+        - run: 
+            name: kubectl run commands
+            command: |
+              kubectl get services
+              kubectl get nodes
+              kubectl get deploy
+
 
         - run:
             name: Update CloudFront Distribution
@@ -327,17 +334,17 @@ jobs:
 workflows:
   default:
     jobs:
-      - docker-lint
-      - docker-build-and-push-image:
-          requires: [docker-lint]
-      - deploy-infrastructure:
-          requires: [docker-build-and-push-image]
-      - configure-infrastructure:
-          requires: [deploy-infrastructure]
-      - configure-cloudfront:
-          requires: [configure-infrastructure]
-      - smoke-test:
-          requires: [configure-cloudfront]
+#      - docker-lint
+#      - docker-build-and-push-image:
+#          requires: [docker-lint]
+#      - deploy-infrastructure:
+#          requires: [docker-build-and-push-image]
+#      - configure-infrastructure:
+#          requires: [deploy-infrastructure]
+      - configure-cloudfront
+#          requires: [configure-infrastructure]
+#      - smoke-test:
+#          requires: [configure-cloudfront]
 
 
       
