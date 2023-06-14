@@ -218,7 +218,7 @@ jobs:
               echo $ifmatch
               aws cloudfront update-distribution --id E2BYV5ZTTW57XP --if-match $ifmatch --distribution-config file://distribution-config.json
 
-#setup-cloudfront is to setup the cloudfront for the very first time
+#setup-cloudfront is to setup the cloudfront for the very first time.
 
   setup-cloudfront:
       environment:
