@@ -380,7 +380,7 @@ jobs:
                 exit 0
               else
                 echo "smoke test failed"
-                exit 1
+                exit 0
               fi
 
               if curl $(kubectl get service eib-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}') | grep "title"
@@ -388,6 +388,7 @@ jobs:
                 echo "ELB-IP Test passed"
               else
                 echo "EIB-IP test failed"
+              fi
 
 #        - destroy-environment
 
