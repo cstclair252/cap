@@ -69,3 +69,4 @@ The following main files are used in the project:
 * Dockerfile: The Dockerfile used to build the Docker image for the website.
 * ELBCreate.yml: The YAML file defining the Elastic Load Balancer (ELB) creation for the Kubernetes cluster.
 * deployment.yml: The YAML file defining the deployment configuration for the website.
+* distribution-config.json: This file is used to rename the originname for Cloudfront distribution.
